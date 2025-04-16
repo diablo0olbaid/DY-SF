@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/guardar-premio.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
