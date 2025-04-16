@@ -9,13 +9,13 @@ module.exports = async (req, res) => {
 
   // Configuración de Marketing Cloud
   const clientId = '8w7vukn7qtlgn6siav8pg002';
-  const clientSecret = 'AQUÍ_VA_TU_CLIENT_SECRET';
+  const clientSecret = 'uDy3ItcUI1HLcW1PGRW8fSPG';
   const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
   const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
-  const dataExtensionKey = 'REEMPLAZAR_POR_NOMBRE_EXTERNO_DE_LA_DE';
+  const dataExtensionKey = 'ruleta_prueba';
 
   try {
-    // Paso 1: Obtener token
+    // Paso 1: Obtener token de acceso
     const tokenResponse = await axios.post(authUrl, {
       grant_type: 'client_credentials',
       client_id: clientId,
@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
 
     const accessToken = tokenResponse.data.access_token;
 
-    // Paso 2: Insertar en la DE
+    // Paso 2: Enviar datos a la DE
     const insertUrl = `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`;
 
     const payload = [
@@ -44,6 +44,6 @@ module.exports = async (req, res) => {
     res.status(200).json({ success: true });
   } catch (err) {
     console.error(err.response?.data || err.message);
-    res.status(500).json({ error: 'No se pudo guardar en la DE' });
+    res.status(500).json({ error: 'Error al guardar en la DE' });
   }
 };
