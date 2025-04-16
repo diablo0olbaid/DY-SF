@@ -43,7 +43,10 @@ module.exports = async (req, res) => {
 
     res.status(200).json({ success: true });
   } catch (err) {
-    console.error(err.response?.data || err.message);
-    res.status(500).json({ error: 'Error al guardar en la DE' });
+    // Manejo mejorado del error para que se vea bien en logs
+    console.error('ERROR DETECTADO EN LA INTEGRACIÓN:', err.response?.data || err.message || err);
+    res.status(500).json({
+      error: err.response?.data || err.message || 'Error desconocido al guardar en la DE'
+    });
   }
 };
