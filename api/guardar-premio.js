@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
 
   // Configuración de Marketing Cloud
   const clientId = '8w7vukn7qtlgn6siav8pg002';
-  const clientSecret = 'uDy3ItcUI1HLcW1PGRW8fSPG';
+  const clientSecret = 'TbSVFUuXTBf4HdDB8K0XQioC';
   const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
   const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
   const dataExtensionKey = 'ruleta_prueba';
