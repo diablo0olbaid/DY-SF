@@ -62,15 +62,15 @@ module.exports = async (req, res) => {
     console.log("🚀 Enviando a URL:", url);
 
     const insertResponse = await axios.post(
-      url,
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+  `${restUrl}/data/v1/customobjectdata/rowset?CustomerKey=${dataExtensionKey}`,
+  payload,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  }
+);
 
     console.log("✅ Registro guardado:", insertResponse.data);
     res.status(200).json({ mensaje: 'Premio guardado correctamente.', resultado: insertResponse.data });
