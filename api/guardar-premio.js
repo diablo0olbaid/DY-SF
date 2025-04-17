@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
       values: { premio }
     }];
 
-    const url = `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`;
+    const url = `${restUrl}/data/v1/customobjectdata/rowset?CustomerKey=${dataExtensionKey}`;
     console.log("📦 Payload a enviar:", JSON.stringify(payload, null, 2));
     console.log("🚀 Enviando a URL:", url);
 
