@@ -1,11 +1,11 @@
-import axios from 'axios';
+const axios = require('axios');
 
 const clientId = '8w7vukn7qtlgn6siav8pg002';
 const clientSecret = 'TbSVFUuXTBf4HdDB8K0XQioC';
 const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
 const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
 const dataExtensionKey = 'ruleta_final';
-const mid = '534014774'; // MID de la unidad de negocio E-commerce
+const mid = '534014774'; // BU E-commerce
 
 async function obtenerToken() {
   const response = await axios.post(authUrl, {
@@ -42,7 +42,7 @@ async function guardarPremio(email, premio) {
   return response.data;
 }
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -73,4 +73,4 @@ export default async function handler(req, res) {
       data: error.response?.data
     });
   }
-}
+};
