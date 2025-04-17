@@ -18,28 +18,31 @@ async function obtenerToken() {
   return response.data.access_token;
 }
 
-async function guardarPremio(email, premio) {
+async function verificarDEExiste() {
   const token = await obtenerToken();
 
-  const payload = [
-    {
-      keys: { Email: email },
-      values: { Premio: premio }
-    }
-  ];
-
-  const response = await axios.post(
-    `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
-    payload,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+  try {
+    const response = await axios.get(
+      `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       }
-    }
-  );
+    );
 
-  return response.data;
+    console.log("✅ La DE existe y respondió:", response.data);
+    return response.data;
+
+  } catch (error) {
+    console.error("❌ La DE no se pudo consultar:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      mensaje: error.message
+    });
+    throw error;
+  }
 }
 
 module.exports = async (req, res) => {
@@ -50,11 +53,40 @@ module.exports = async (req, res) => {
   const { email, premio } = req.body;
 
   try {
-    const result = await guardarPremio(email, premio);
-    res.status(200).json({ success: true, result });
+    console.log("📨 Email recibido:", email, "🎁 Premio:", premio);
+
+    // Verificación temporal
+    const existe = await verificarDEExiste();
+
+    // Si querés después de verificar, guardar el premio como antes:
+    /*
+    const token = await obtenerToken();
+    const payload = [{
+      keys: { Email: email },
+      values: { Premio: premio }
+    }];
+
+    const response = await axios.post(
+      `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    */
+
+    res.status(200).json({
+      mensaje: 'Verificación de DE realizada',
+      resultado: existe
+    });
+
   } catch (error) {
-    console.error('🔥 ERROR:', {
+    console.error('🔥 ERROR DETECTADO:', {
       mensaje: error.message,
+      stack: error.stack,
       status: error.response?.status,
       data: error.response?.data
     });
