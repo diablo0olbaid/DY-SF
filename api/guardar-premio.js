@@ -18,30 +18,13 @@ async function obtenerToken() {
   return response.data.access_token;
 }
 
-// Verifica qué campos reconoce la DE
-async function verificarCamposDeLaDE(token) {
-  const url = `${restUrl}/data/v1/customobjectdata/keys`;
-  const response = await axios.get(url, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-}
-
 async function guardarPremio(email, premio) {
   const token = await obtenerToken();
 
-  // DEBUG: Obtener la estructura real de la DE (clave, campos, etc.)
-  try {
-    const campos = await verificarCamposDeLaDE(token);
-    console.log("📋 Campos disponibles en DE:", JSON.stringify(campos, null, 2));
-  } catch (e) {
-    console.warn("⚠️ No se pudieron obtener campos de la DE");
-  }
-
   const payload = [
     {
-      keys: { Email: email },
-      values: { Premio: premio }
+      keys: { Email: email },      // Usa exactamente "Email"
+      values: { Premio: premio }   // Usa exactamente "Premio"
     }
   ];
 
