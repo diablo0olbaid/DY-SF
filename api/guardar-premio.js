@@ -1,21 +1,23 @@
 const axios = require('axios');
 
-const clientId = 'TU_CLIENT_ID';
-const clientSecret = 'TU_CLIENT_SECRET';
-const mid = 'TU_MID';
-const authUrl = 'https://TU_SUBDOMAIN.auth.marketingcloudapis.com/v2/token';
-const restUrl = 'https://TU_SUBDOMAIN.rest.marketingcloudapis.com';
+// TUS CREDENCIALES
+const clientId = '8w7vukn7qtlgn6siav8pg002';
+const clientSecret = 'TbSVFUuXTBf4HdDB8K0XQioC';
+const mid = '534014774';
 const dataExtensionKey = 'ruleta_final';
 
+// ENDPOINTS REALES
+const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
+const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
+
 async function obtenerToken() {
-  const response = await axios.post(authUrl, {
+  const { data } = await axios.post(authUrl, {
     grant_type: 'client_credentials',
     client_id: clientId,
     client_secret: clientSecret,
     account_id: mid
   });
-
-  return response.data.access_token;
+  return data.access_token;
 }
 
 module.exports = async (req, res) => {
@@ -29,24 +31,20 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Faltan datos: email y premio son obligatorios.' });
   }
 
+  console.log(`📨 Email recibido: ${email} 🎁 Premio: ${premio}`);
+
   try {
-    console.log('📨 Email recibido:', email, '🎁 Premio:', premio);
-
+    console.log('🔐 Obteniendo token...');
     const token = await obtenerToken();
+    console.log('✅ Token obtenido');
 
-    // Verificar DE (opcional pero útil)
-    const verificacion = await axios.get(
-      `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    console.log('✅ DE verificada:', verificacion.data);
-
+    console.log('📦 Enviando datos a DE...');
     const payload = [{
       keys: { Email: email },
       values: { Premio: premio }
     }];
 
-    const respuesta = await axios.post(
+    const response = await axios.post(
       `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
       payload,
       {
@@ -57,10 +55,14 @@ module.exports = async (req, res) => {
       }
     );
 
-    res.status(200).json({ mensaje: 'Registro guardado exitosamente', resultado: respuesta.data });
+    console.log('✅ Datos enviados correctamente:', response.data);
+
+    res.status(200).json({ mensaje: 'Premio guardado en Salesforce', resultado: response.data });
+
   } catch (error) {
     console.error('🔥 ERROR DETECTADO:', {
       mensaje: error.message,
+      stack: error.stack,
       status: error.response?.status,
       data: error.response?.data
     });
