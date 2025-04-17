@@ -5,7 +5,7 @@ const clientSecret = 'TbSVFUuXTBf4HdDB8K0XQioC';
 const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
 const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
 const dataExtensionKey = 'ruleta_final';
-const mid = '534014774';
+const mid = '534014774'; // Business Unit E-commerce
 
 async function obtenerToken() {
   const response = await axios.post(authUrl, {
@@ -23,48 +23,47 @@ async function guardarPremio(email, premio) {
 
   const payload = [
     {
-      keys: { Email: email }, // IMPORTANTE: "Email" con mayúscula, como está en la DE
-      values: { Premio: premio }
+      keys: {
+        Email: email // IMPORTANTE: respetar el nombre EXACTO del campo clave en la DE
+      },
+      values: {
+        Premio: premio // IMPORTANTE: respetar el nombre EXACTO del atributo
+      }
     }
   ];
 
-  const response = await axios.post(
-    `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
-    payload,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+  const url = `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`;
+
+  const response = await axios.post(url, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
     }
-  );
+  });
 
   return response.data;
 }
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const { email, premio } = req.body;
 
   if (!email || !premio) {
-    return res.status(400).json({
-      error: 'Faltan datos: email y premio son obligatorios.'
-    });
+    return res.status(400).json({ error: 'Faltan datos: email y premio son obligatorios.' });
   }
 
   try {
-    console.log("📨 Email recibido:", email, "🎁 Premio:", premio);
+    console.log('📨 Email recibido:', email, '🎁 Premio:', premio);
 
     const resultado = await guardarPremio(email, premio);
 
-    return res.status(200).json({
-      mensaje: 'Registro exitoso en DE.',
+    res.status(200).json({
+      mensaje: 'Premio guardado correctamente.',
       resultado
     });
-
   } catch (error) {
     console.error('🔥 ERROR DETECTADO:', {
       mensaje: error.message,
@@ -72,7 +71,7 @@ module.exports = async (req, res) => {
       data: error.response?.data
     });
 
-    return res.status(500).json({
+    res.status(500).json({
       error: 'Hubo un error en el servidor',
       detalle: error.message,
       status: error.response?.status,
