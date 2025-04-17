@@ -1,15 +1,16 @@
 const axios = require('axios');
 
-// TUS CREDENCIALES
+// ✅ TUS CREDENCIALES Y CONFIG
 const clientId = '8w7vukn7qtlgn6siav8pg002';
 const clientSecret = 'TbSVFUuXTBf4HdDB8K0XQioC';
 const mid = '534014774';
 const dataExtensionKey = 'ruleta_final';
 
-// ENDPOINTS REALES
+// ✅ ENDPOINTS REALES DE SFMC
 const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
 const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
 
+// 🔐 Obtener token
 async function obtenerToken() {
   const { data } = await axios.post(authUrl, {
     grant_type: 'client_credentials',
@@ -20,6 +21,7 @@ async function obtenerToken() {
   return data.access_token;
 }
 
+// 🚀 Handler
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -31,18 +33,18 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Faltan datos: email y premio son obligatorios.' });
   }
 
-  console.log(`📨 Email recibido: ${email} 🎁 Premio: ${premio}`);
+  console.log('📨 Email recibido:', email, '🎁 Premio:', premio);
 
   try {
-    console.log('🔐 Obteniendo token...');
     const token = await obtenerToken();
-    console.log('✅ Token obtenido');
+    console.log('🔐 Token generado con éxito');
 
-    console.log('📦 Enviando datos a DE...');
     const payload = [{
-      keys: { Email: email },
-      values: { Premio: premio }
+      keys: { email: email },     // 🧠 Importante: nombres exactos en minúscula
+      values: { premio: premio }
     }];
+
+    console.log('📦 Payload:', JSON.stringify(payload, null, 2));
 
     const response = await axios.post(
       `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
@@ -55,14 +57,16 @@ module.exports = async (req, res) => {
       }
     );
 
-    console.log('✅ Datos enviados correctamente:', response.data);
+    console.log('✅ Datos guardados en SFMC:', response.data);
 
-    res.status(200).json({ mensaje: 'Premio guardado en Salesforce', resultado: response.data });
+    res.status(200).json({
+      mensaje: 'Premio guardado en Salesforce',
+      resultado: response.data
+    });
 
   } catch (error) {
     console.error('🔥 ERROR DETECTADO:', {
       mensaje: error.message,
-      stack: error.stack,
       status: error.response?.status,
       data: error.response?.data
     });
