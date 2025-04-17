@@ -23,7 +23,7 @@ async function guardarPremio(email, premio) {
 
   const payload = [
     {
-      keys: { Email: email },      // Usa exactamente "Email"
+      keys: { SubscriberKey: email },      // Usa exactamente "Email"
       values: { Premio: premio }   // Usa exactamente "Premio"
     }
   ];
