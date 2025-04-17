@@ -58,22 +58,25 @@ module.exports = async (req, res) => {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { email, premio } = req.body;
+  // Asegurar parseo correcto del body (especialmente en Vercel)
+  const body = req.body || JSON.parse(await new Promise(resolve => {
+    let data = ''
+    req.on('data', chunk => data += chunk)
+    req.on('end', () => resolve(data))
+  }));
+
+  const { email, premio } = body;
 
   try {
-    console.log('📨 Email recibido:', email, '🎁 Premio:', premio);
+    console.log("📨 Email recibido:", email, "🎁 Premio:", premio);
 
-    const token = await obtenerToken();
-    const verificacion = await verificarDEExiste(token);
-    console.log('✅ Verificación de DE:', verificacion);
-
-    const resultado = await guardarPremio(email, premio, token);
-    console.log('🎯 Resultado del guardado:', resultado);
+    const result = await guardarPremio(email, premio);
 
     res.status(200).json({
-      mensaje: 'Premio guardado correctamente en la DE',
-      resultado
+      mensaje: 'Premio guardado exitosamente',
+      resultado: result
     });
+
   } catch (error) {
     console.error('🔥 ERROR DETECTADO:', {
       mensaje: error.message,
@@ -90,3 +93,4 @@ module.exports = async (req, res) => {
     });
   }
 };
+
