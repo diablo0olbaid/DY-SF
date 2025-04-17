@@ -18,58 +18,33 @@ async function obtenerToken() {
   return response.data.access_token;
 }
 
-async function guardarPremio(email, premio) {
-  const token = await obtenerToken();
-
-  const payload = [
-    {
-      keys: { Email: email },
-      values: { Premio: premio }
-    }
-  ];
-
-  console.log("\ud83d\udce6 Payload que se envi\u00e1r\u00e1 a SFMC:", JSON.stringify(payload, null, 2));
-
-  const response = await axios.post(
-    `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
-    payload,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }
-  );
-
-  return response.data;
-}
-
 module.exports = async (req, res) => {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
-
-  const { email, premio } = req.body;
-
   try {
-    console.log("\ud83d\udce9 Email recibido:", email, "\ud83c\udff1 Premio:", premio);
+    const token = await obtenerToken();
 
-    const result = await guardarPremio(email, premio);
+    const response = await axios.get(
+      `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
     res.status(200).json({
-      success: true,
-      result
+      mensaje: '✅ La DE existe y respondió correctamente.',
+      resultado: response.data
     });
   } catch (error) {
-    console.error('\ud83d\udd25 ERROR DETECTADO:', {
-      mensaje: error.message,
-      stack: error.stack,
+    console.error("❌ Error al consultar la DE:", {
       status: error.response?.status,
-      data: error.response?.data
+      data: error.response?.data,
+      mensaje: error.message
     });
 
     res.status(500).json({
-      error: 'Hubo un error en el servidor',
+      error: 'No se pudo verificar la DE',
       detalle: error.message,
       status: error.response?.status,
       data: error.response?.data
