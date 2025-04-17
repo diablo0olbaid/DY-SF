@@ -18,33 +18,56 @@ async function obtenerToken() {
   return response.data.access_token;
 }
 
-module.exports = async (req, res) => {
-  try {
-    const token = await obtenerToken();
+async function guardarPremio(email, premio) {
+  const token = await obtenerToken();
 
-    const response = await axios.get(
-      `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+  const payload = [
+    {
+      keys: { Email: email },
+      values: { Premio: premio }
+    }
+  ];
+
+  const response = await axios.post(
+    `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
-    );
+    }
+  );
+
+  return response.data;
+}
+
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+
+  const { email, premio } = req.body;
+
+  try {
+    console.log("📨 Email recibido:", email, "🎁 Premio:", premio);
+
+    const resultado = await guardarPremio(email, premio);
 
     res.status(200).json({
-      mensaje: '✅ La DE existe y respondió correctamente.',
-      resultado: response.data
+      mensaje: 'Premio guardado exitosamente',
+      resultado
     });
   } catch (error) {
-    console.error("❌ Error al consultar la DE:", {
+    console.error('🔥 ERROR DETECTADO:', {
+      mensaje: error.message,
+      stack: error.stack,
       status: error.response?.status,
-      data: error.response?.data,
-      mensaje: error.message
+      data: error.response?.data
     });
 
     res.status(500).json({
-      error: 'No se pudo verificar la DE',
+      error: 'Hubo un error en el servidor',
       detalle: error.message,
       status: error.response?.status,
       data: error.response?.data
