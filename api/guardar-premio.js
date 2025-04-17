@@ -5,7 +5,7 @@ const clientSecret = 'TbSVFUuXTBf4HdDB8K0XQioC';
 const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
 const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
 const dataExtensionKey = 'ruleta_final';
-const mid = '534014774'; // BU E-commerce
+const mid = '534014774';
 
 async function obtenerToken() {
   const response = await axios.post(authUrl, {
@@ -50,18 +50,11 @@ module.exports = async (req, res) => {
   const { email, premio } = req.body;
 
   try {
-    console.log("📨 Email recibido:", email, "🎁 Premio:", premio);
-
     const result = await guardarPremio(email, premio);
-
-    res.status(200).json({
-      success: true,
-      result
-    });
+    res.status(200).json({ success: true, result });
   } catch (error) {
-    console.error('🔥 ERROR DETECTADO:', {
+    console.error('🔥 ERROR:', {
       mensaje: error.message,
-      stack: error.stack,
       status: error.response?.status,
       data: error.response?.data
     });
