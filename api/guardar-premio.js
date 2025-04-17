@@ -1,52 +1,49 @@
 const axios = require('axios');
 
-module.exports = async (req, res) => {
-  if (req.method !== 'POST') {
-    return res.status(405).send('Method Not Allowed');
-  }
+const clientId = '8w7vukn7qtlgn6siav8pg002';
+const clientSecret = 'TbSVFUuXTBf4HdDB8K0XQioC';
+const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
+const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
+const dataExtensionKey = 'ruleta_final';
 
-  const { email, premio } = req.body;
+async function obtenerToken() {
+  const response = await axios.post(authUrl, {
+    grant_type: 'client_credentials',
+    client_id: clientId,
+    client_secret: clientSecret
+  });
+  return response.data.access_token;
+}
 
-  // Configuración de Marketing Cloud
-  const clientId = '8w7vukn7qtlgn6siav8pg002';
-  const clientSecret = 'TbSVFUuXTBf4HdDB8K0XQioC';
-  const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
-  const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
-  const dataExtensionKey = 'ruleta_prueba';
+async function guardarPremio(email, premio) {
+  const token = await obtenerToken();
 
-  try {
-    // Paso 1: Obtener token de acceso
-    const tokenResponse = await axios.post(authUrl, {
-      grant_type: 'client_credentials',
-      client_id: clientId,
-      client_secret: clientSecret
-    });
-
-    const accessToken = tokenResponse.data.access_token;
-
-    // Paso 2: Enviar datos a la DE
-    const insertUrl = `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`;
-
-    const payload = [
-      {
-        keys: { Email: email },
-        values: { Premio: premio }
+  const body = [
+    {
+      keys: {
+        Email: email
+      },
+      values: {
+        Premio: premio
       }
-    ];
+    }
+  ];
 
-    await axios.post(insertUrl, payload, {
+  const response = await axios.post(
+    `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
+    body,
+    {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
-    });
+    }
+  );
 
-    res.status(200).json({ success: true });
-  } catch (err) {
-    // Manejo mejorado del error para que se vea bien en logs
-    console.error('ERROR DETECTADO EN LA INTEGRACIÓN:', err.response?.data || err.message || err);
-    res.status(500).json({
-      error: err.response?.data || err.message || 'Error desconocido al guardar en la DE'
-    });
-  }
-};
+  return response.data;
+}
+
+// Para pruebas
+guardarPremio('test@test.com', 'GANASTE 25% OFF')
+  .then(res => console.log('✔️ Éxito:', res))
+  .catch(err => console.error('❌ Error:', err.response?.data || err.message));
