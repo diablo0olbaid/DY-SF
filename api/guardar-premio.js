@@ -1,16 +1,18 @@
 import axios from 'axios';
 
-const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
-const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
 const clientId = '8w7vukn7qtlgn6siav8pg002';
 const clientSecret = 'TbSVFUuXTBf4HdDB8K0XQioC';
+const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
+const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
 const dataExtensionKey = 'ruleta_final';
+const mid = '534014774'; // MID de la unidad de negocio E-commerce
 
 async function obtenerToken() {
   const response = await axios.post(authUrl, {
+    grant_type: 'client_credentials',
     client_id: clientId,
     client_secret: clientSecret,
-    grant_type: 'client_credentials',
+    account_id: mid
   });
 
   return response.data.access_token;
@@ -22,21 +24,21 @@ async function guardarPremio(email, premio) {
   const payload = [
     {
       keys: { Email: email },
-      values: { Premio: premio },
-    },
+      values: { Premio: premio }
+    }
   ];
 
-  const config = {
-    method: 'post',
-    url: `${restUrl}/hub/v1/dataevents/key:${dataExtensionKey}/rowset`,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    data: payload,
-  };
+  const response = await axios.post(
+    `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
 
-  const response = await axios(config);
   return response.data;
 }
 
@@ -54,21 +56,21 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       success: true,
-      result,
+      result
     });
   } catch (error) {
     console.error('🔥 ERROR DETECTADO:', {
       mensaje: error.message,
       stack: error.stack,
       status: error.response?.status,
-      data: error.response?.data,
+      data: error.response?.data
     });
 
     res.status(500).json({
       error: 'Hubo un error en el servidor',
       detalle: error.message,
       status: error.response?.status,
-      data: error.response?.data,
+      data: error.response?.data
     });
   }
 }
