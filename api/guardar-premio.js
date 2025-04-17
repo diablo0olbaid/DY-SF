@@ -62,8 +62,8 @@ async function verificarDEExiste(token) {
 async function guardarPremio(email, premio, token) {
   const payload = [
     {
-      keys: { Email: email },
-      values: { Premio: premio }
+      keys: { Email: Email },
+      values: { Premio: Premio }
     }
   ];
 
