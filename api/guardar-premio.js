@@ -5,7 +5,7 @@ const clientSecret = 'TbSVFUuXTBf4HdDB8K0XQioC';
 const authUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.auth.marketingcloudapis.com/v2/token';
 const restUrl = 'https://mcj90l2mmyz5mnccv2qp30ywn8r0.rest.marketingcloudapis.com';
 const dataExtensionKey = 'ruleta_final';
-const mid = '534014774'; // Business Unit E-commerce
+const mid = '534014774'; // BU e-commerce
 
 async function obtenerToken() {
   const response = await axios.post(authUrl, {
@@ -18,52 +18,53 @@ async function obtenerToken() {
   return response.data.access_token;
 }
 
-async function guardarPremio(email, premio) {
+async function guardarPremio(Email, Premio) {
   const token = await obtenerToken();
 
   const payload = [
     {
-      keys: {
-        Email: email // IMPORTANTE: respetar el nombre EXACTO del campo clave en la DE
-      },
-      values: {
-        Premio: premio // IMPORTANTE: respetar el nombre EXACTO del atributo
-      }
+      keys: { Email },
+      values: { Premio }
     }
   ];
 
-  const url = `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`;
-
-  const response = await axios.post(url, payload, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
+  const response = await axios.post(
+    `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
     }
-  });
+  );
 
   return response.data;
 }
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { email, premio } = req.body;
+  const { Email, Premio } = req.body;
 
-  if (!email || !premio) {
-    return res.status(400).json({ error: 'Faltan datos: email y premio son obligatorios.' });
+  if (!Email || !Premio) {
+    return res.status(400).json({
+      error: 'Faltan datos: Email y Premio son obligatorios. Asegurate de enviarlos con mayúsculas.'
+    });
   }
 
   try {
-    console.log('📨 Email recibido:', email, '🎁 Premio:', premio);
+    console.log("📨 Email recibido:", Email, "🎁 Premio:", Premio);
 
-    const resultado = await guardarPremio(email, premio);
+    const result = await guardarPremio(Email, Premio);
 
     res.status(200).json({
-      mensaje: 'Premio guardado correctamente.',
-      resultado
+      success: true,
+      result
     });
+
   } catch (error) {
     console.error('🔥 ERROR DETECTADO:', {
       mensaje: error.message,
