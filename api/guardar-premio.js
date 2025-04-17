@@ -18,9 +18,20 @@ async function obtenerToken() {
   return response.data.access_token;
 }
 
-async function guardarPremio(email, premio) {
-  const token = await obtenerToken();
+async function verificarDEExiste(token) {
+  const response = await axios.get(
+    `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+  return response.data;
+}
 
+async function guardarPremio(email, premio, token) {
   const payload = [
     {
       keys: { Email: email },
@@ -50,12 +61,17 @@ module.exports = async (req, res) => {
   const { email, premio } = req.body;
 
   try {
-    console.log("📨 Email recibido:", email, "🎁 Premio:", premio);
+    console.log('📨 Email recibido:', email, '🎁 Premio:', premio);
 
-    const resultado = await guardarPremio(email, premio);
+    const token = await obtenerToken();
+    const verificacion = await verificarDEExiste(token);
+    console.log('✅ Verificación de DE:', verificacion);
+
+    const resultado = await guardarPremio(email, premio, token);
+    console.log('🎯 Resultado del guardado:', resultado);
 
     res.status(200).json({
-      mensaje: 'Premio guardado exitosamente',
+      mensaje: 'Premio guardado correctamente en la DE',
       resultado
     });
   } catch (error) {
