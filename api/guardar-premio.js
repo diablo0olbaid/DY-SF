@@ -18,31 +18,28 @@ async function obtenerToken() {
   return response.data.access_token;
 }
 
-async function verificarDEExiste() {
+async function guardarPremio(email, premio) {
   const token = await obtenerToken();
 
-  try {
-    const response = await axios.get(
-      `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+  const payload = [
+    {
+      keys: { Email: email },
+      values: { Premio: premio }
+    }
+  ];
+
+  const response = await axios.post(
+    `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
-    );
+    }
+  );
 
-    console.log("✅ La DE existe y respondió:", response.data);
-    return response.data;
-
-  } catch (error) {
-    console.error("❌ La DE no se pudo consultar:", {
-      status: error.response?.status,
-      data: error.response?.data,
-      mensaje: error.message
-    });
-    throw error;
-  }
+  return response.data;
 }
 
 module.exports = async (req, res) => {
@@ -55,32 +52,11 @@ module.exports = async (req, res) => {
   try {
     console.log("📨 Email recibido:", email, "🎁 Premio:", premio);
 
-    // Verificación temporal
-    const existe = await verificarDEExiste();
-
-    // Si querés después de verificar, guardar el premio como antes:
-    /*
-    const token = await obtenerToken();
-    const payload = [{
-      keys: { Email: email },
-      values: { Premio: premio }
-    }];
-
-    const response = await axios.post(
-      `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    */
+    const resultado = await guardarPremio(email, premio);
 
     res.status(200).json({
-      mensaje: 'Verificación de DE realizada',
-      resultado: existe
+      mensaje: 'Premio guardado correctamente en la DE',
+      resultado
     });
 
   } catch (error) {
