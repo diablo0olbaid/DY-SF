@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const clientId = '8w7vukn7qtlgn6siav8pg002';
 const clientSecret = 'TbSVFUuXTBf4HdDB8K0XQioC';
@@ -43,7 +43,21 @@ async function guardarPremio(email, premio) {
   return response.data;
 }
 
-// Para pruebas
-guardarPremio('test@test.com', 'GANASTE 25% OFF')
-  .then(res => console.log('✔️ Éxito:', res))
-  .catch(err => console.error('❌ Error:', err.response?.data || err.message));
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+
+  const { email, premio } = req.body;
+
+  try {
+    const result = await guardarPremio(email, premio);
+    res.status(200).json({ success: true, result });
+  } catch (error) {
+    console.error('💥 ERROR al guardar el premio:', error.response?.data || error.message || error);
+    res.status(500).json({
+      error: 'Hubo un error en el servidor',
+      detalle: error.response?.data || error.message || 'Error desconocido'
+    });
+  }
+}
