@@ -28,6 +28,8 @@ async function guardarPremio(email, premio) {
     }
   ];
 
+  console.log("\ud83d\udce6 Payload que se envi\u00e1r\u00e1 a SFMC:", JSON.stringify(payload, null, 2));
+
   const response = await axios.post(
     `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
     payload,
@@ -50,17 +52,16 @@ module.exports = async (req, res) => {
   const { email, premio } = req.body;
 
   try {
-    console.log("📨 Email recibido:", email, "🎁 Premio:", premio);
+    console.log("\ud83d\udce9 Email recibido:", email, "\ud83c\udff1 Premio:", premio);
 
-    const resultado = await guardarPremio(email, premio);
+    const result = await guardarPremio(email, premio);
 
     res.status(200).json({
-      mensaje: 'Premio guardado correctamente en la DE',
-      resultado
+      success: true,
+      result
     });
-
   } catch (error) {
-    console.error('🔥 ERROR DETECTADO:', {
+    console.error('\ud83d\udd25 ERROR DETECTADO:', {
       mensaje: error.message,
       stack: error.stack,
       status: error.response?.status,
