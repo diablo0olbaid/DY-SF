@@ -22,12 +22,12 @@ async function guardarPremio(Email, Premio) {
   const token = await obtenerToken();
 
   const payload = [
-    {
-      keys: { Email },
-      values: { Premio }
-    }
-  ];
-
+  {
+    keys: { Email: email },
+    values: { Premio: premio }
+  }
+];
+  
   const response = await axios.post(
     `${restUrl}/data/v1/customobjectdata/key/${dataExtensionKey}/rowset`,
     payload,
