@@ -1,5 +1,9 @@
 {
+  "version": 2,
   "builds": [
     { "src": "api/guardar-premio.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/guardar-premio", "dest": "api/guardar-premio.js" }
   ]
 }
