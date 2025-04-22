@@ -1,0 +1,5 @@
+{
+  "builds": [
+    { "src": "api/guardar-premio.js", "use": "@vercel/node" }
+  ]
+}
